@@ -1,0 +1,38 @@
+{
+  "name": "random-sync",
+  "version": "1.0.0",
+  "description": "",
+  "main": "webpack.server.js",
+  "scripts": {
+    "dev:build-client": "NODE_ENV=development webpack --config webpack.client.js --mode=development --watch",
+    "dev:build-server": "NODE_ENV=development webpack --config webpack.server.js --mode=development --watch",
+    "dev:start": "nodemon ./server-build/index.js",
+    "dev": "npm-run-all --parallel  dev:*"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/core": "^7.11.4",
+    "@babel/preset-env": "^7.11.0",
+    "@babel/preset-react": "^7.10.4",
+    "babel-loader": "^8.1.0",
+    "clean-webpack-plugin": "^3.0.0",
+    "html-webpack-plugin": "^4.3.0",
+    "npm-run-all": "^4.1.5",
+    "webpack": "^4.44.1",
+    "webpack-cli": "^3.3.12",
+    "webpack-dev-server": "^3.11.0",
+    "webpack-node-externals": "^2.5.2"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "express-session": "^1.17.1",
+    "nodemon": "^2.0.4",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1",
+    "socket.io": "^2.3.0",
+    "socket.io-client": "^2.3.0"
+  }
+}
