@@ -1,48 +1,40 @@
 import React, { useState, useEffect } from "react";
 import { useSocket } from "./hooks/socket/useSocket";
-import ListUsers from "./components/ListUsers";
+import ListUsersOnline from "./components/ListUsersOnline";
+import ListUsersSync from "./components/ListUsersSync";
 
 function App() {
   const { socket } = useSocket();
-  const [initialData, setInitialData] = useState({});
-  const { userLoggedIn, initialUsers } = initialData;
+  const [userLoggedIn, setUserLoggedIn] = useState("");
 
-  const handleOnClik = () => {
+  useEffect(() => {
+    socket.emit("logged in", function ({ username }) {
+      username && setUserLoggedIn(username);
+    });
+  }, []);
+
+  const handleOnClikLogout = () => {
     socket.emit("logout", function (ack) {
-      setInitialData({});
+      setUserLoggedIn("");
     });
   };
 
-    const handleOnKeyPress = (event) => {
-      if (event.key === "Enter") {
-        let name = event.target.value;
-        socket.emit("register", name, function ({ username, data }) {
-          setInitialData({
-            userLoggedIn: username,
-            initialUsers: data,
-          });
-        });
-      }
-    };
-
-  useEffect(() => {
-    socket.emit("question", "is logged in?", function ({ username, data }) {
-      username &&
-        setInitialData({
-          userLoggedIn: username,
-          initialUsers: data,
-        });
-    });
-  }, [])
-
-
+  const handleOnKeyPress = (event) => {
+    if (event.key === "Enter") {
+      let name = event.target.value;
+      socket.emit("register", name, function ({ username }) {
+        setUserLoggedIn(username);
+      });
+    }
+  };
   return (
     <>
       {userLoggedIn && (
         <>
-          <h1>Welcomeee {userLoggedIn}!</h1>{" "}
-          <ListUsers initialUsers={initialUsers} />
-          <button onClick={handleOnClik} >Exit</button>
+          <h1>Welcomeee {userLoggedIn}!</h1>
+          <ListUsersOnline />
+          <ListUsersSync userLoggedIn={userLoggedIn} />
+          <button onClick={handleOnClikLogout}>Exit</button>
         </>
       )}
       {!userLoggedIn && <input type="text" onKeyPress={handleOnKeyPress} />}

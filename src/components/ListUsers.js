@@ -1,17 +1,15 @@
-import React, { useState } from "react";
-import { useSocket } from "../hooks/socket/useSocket";
+import React from "react";
 
-function ListUsers({ initialUsers }) {
-  const [users, setUsers] = useState(initialUsers);
-
-  useSocket("streamUsers", ({ data }) => setUsers(data));
-
+function ListUsers({ users, title }) {
   return (
-    <ul>
-      {users.map(({ id, name }) => (
-        <li key={id}>{name}</li>
-      ))}
-    </ul>
+     <>
+      <h2>{title}</h2>
+      <ul>
+        {users.map(({ id, name }) => (
+          <li key={id}>{name}</li>
+        ))}
+      </ul>
+    </>
   );
 }
 

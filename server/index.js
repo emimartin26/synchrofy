@@ -1,56 +1,63 @@
-import express from "express";
-import session from "express-session";
 import http from "http";
-import cookie from "cookie";
-import socketIo from "socket.io";
+
+import buildApp from "./utils/express";
+import buildSocket from "./utils/socket";
+import sessionMiddleware from "./utils/sessionMiddleware";
 
 const port = process.env.PORT || 4001;
-const index = require("./routes/index.js");
 
-const app = express();
-
-const sessionMiddleware = session({
-  secret: "keyboard cat",
-  resave: true,
-  saveUninitialized: true,
-  cookie: {
-    secure: false,
-    httpOnly: false,
-    maxAge: 3600000 * 5, // 5 hours
-  },
+const app = buildApp({
+  sessionMiddleware,
 });
-
-app.use(sessionMiddleware);
-app.use(express.json());
-app.use(express.static("./build"));
-
-app.use(index);
 
 const server = http.createServer(app);
 
-const io = socketIo(server, {
-  pingTimeout: 60000, // https://socket.io/docs/server-api/,
-  cookie: false,
-  //cookieHttpOnly: true,
-});
+const io = buildSocket({ sessionMiddleware, server });
 
-// register middleware in Socket.IO
-io.use((socket, next) => {
-  console.log("cookie: " + socket.handshake.headers["cookie"]);
-  //socket.request.cookie = socket.handshake.headers["cookie"];
-  sessionMiddleware(socket.request, socket.request.res, next);
-});
-
-let users = [];
+let users_online = [];
+let users_sync = [];
+let turn = null;
+let syncStarted = false;
 
 io.on("connection", (socket) => {
   let addedUser = false;
 
-  socket.on("question", (name, callback) => {
-    if (name === "is logged in?") {
-      const session = socket.request.session;
-      session.username && callback({ username: session.username, data: users });
+  socket.on("start sync", () => {
+    if (!syncStarted) {
+      users_sync = [...users_online];
+      syncStarted = true;
+
+      turn = users_sync[Math.floor(Math.random() * users_sync.length)];
+
+      users_sync = users_sync.filter((user) => user.id !== turn.id);
+      
+      io.emit("users sync changed", {
+        users_sync,
+        turn,
+      });
     }
+  });
+
+  socket.on("sync users", () => {
+    socket.emit("users sync changed", { users_sync, turn });
+  });
+
+  socket.on("next turn", () => {
+    turn = users_sync[Math.floor(Math.random() * users_sync.length)];
+
+    users_sync = users_sync.filter((user) => user.id !== turn.id);
+
+    io.emit("users sync changed", {
+      users_sync,
+      turn: turn,
+    });
+
+    if (users_sync.length == 0) syncStarted = false;
+
+  });
+
+  socket.on("online users", (callback) => {
+    callback({ users_online });
   });
 
   socket.on("register", (username, callback) => {
@@ -62,34 +69,37 @@ io.on("connection", (socket) => {
     session.username = username;
     session.save();
 
-    console.log("register: " + username);
-
     let newUser = { id: session.id, name: username };
 
-    users.push(newUser);
+    users_online.push(newUser);
 
-    socket.broadcast.emit("streamUsers", { data: users });
+    socket.broadcast.emit("streamUsers", { users_online });
 
-    callback({ username, data: users });
+    callback({ username });
+  });
+
+  socket.on("logged in", (callback) => {
+    const session = socket.request.session;
+    session.username && callback({ username: session.username });
   });
 
   socket.on("logout", (callback) => {
     const session = socket.request.session;
-    users = users.filter((user) => user.id !== session.id);
+    users_online = users_online.filter((user) => user.id !== session.id);
     session.username = null;
 
     socket.broadcast.emit("streamUsers", {
-      data: users,
+      users_online,
     });
 
-    callback("logout succes")
+    callback("logout succes");
   });
 
   socket.on("disconnect", () => {
     if (addedUser) {
-      users = users.filter((user) => user.id !== socket.id);
+      users_online = users_online.filter((user) => user.id !== socket.id);
       io.emit("streamUsers", {
-        data: users,
+        users_online,
       });
 
       console.log("Client disconnected: " + socket.username);
