@@ -1,14 +1,23 @@
 import React from "react";
+import { List, Divider } from "antd";
+import {
+  CheckCircleTwoTone,
+} from "@ant-design/icons";
 
-function ListUsers({ users, title }) {
+function ListUsers({ users, title, subtitle }) {
   return (
-     <>
-      <h2>{title}</h2>
-      <ul>
-        {users.map(({ id, name }) => (
-          <li key={id}>{name}</li>
-        ))}
-      </ul>
+    <>
+      <Divider orientation="center">{title}</Divider>
+      <List
+        header={<h3>{subtitle}</h3>}
+        bordered
+        dataSource={users}
+        renderItem={({ id, name }) => (
+          <List.Item key={id}>
+            <CheckCircleTwoTone twoToneColor="#52c41a" /> {name}
+          </List.Item>
+        )}
+      />
     </>
   );
 }

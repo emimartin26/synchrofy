@@ -1,7 +1,15 @@
 import React, { useState, useEffect } from "react";
+import { Card, Button } from "antd";
+
 import { useSocket } from "./hooks/socket/useSocket";
-import ListUsersOnline from "./components/ListUsersOnline";
-import ListUsersSync from "./components/ListUsersSync";
+import Home from "./components/Home";
+import Login from "./components/Login";
+
+import "antd/dist/antd.css";
+
+const gridStyle = {
+  textAlign: "center",
+};
 
 function App() {
   const { socket } = useSocket();
@@ -13,7 +21,7 @@ function App() {
     });
   }, []);
 
-  const handleOnClikLogout = () => {
+  const handleOnClickLogout = () => {
     socket.emit("logout", function (ack) {
       setUserLoggedIn("");
     });
@@ -28,17 +36,18 @@ function App() {
     }
   };
   return (
-    <>
-      {userLoggedIn && (
-        <>
-          <h1>Welcomeee {userLoggedIn}!</h1>
-          <ListUsersOnline />
-          <ListUsersSync userLoggedIn={userLoggedIn} />
-          <button onClick={handleOnClikLogout}>Exit</button>
-        </>
-      )}
-      {!userLoggedIn && <input type="text" onKeyPress={handleOnKeyPress} />}
-    </>
+    <div>
+      <Card title="Synchrofy">
+        {userLoggedIn ? (
+          <Home
+            userLoggedIn={userLoggedIn}
+            handleOnClickLogout={handleOnClickLogout}
+          />
+        ) : (
+          <Login handleOnKeyPress={handleOnKeyPress} />
+        )}
+      </Card>
+    </div>
   );
 }
 

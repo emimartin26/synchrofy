@@ -4,8 +4,6 @@ import App from "./App";
 
 import { SocketIOProvider } from "./hooks/socket/provider";
 
-
-
 ReactDOM.render(
   <SocketIOProvider
     opts={{

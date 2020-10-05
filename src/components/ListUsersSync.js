@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
+import { Button } from "antd";
+
 import { useSocket } from "../hooks/socket/useSocket";
 import ListUsers from "./ListUsers";
+import { StepForwardOutlined, CaretRightOutlined } from "@ant-design/icons";
 
 function ListUsersSync({ userLoggedIn }) {
   const [data, setData] = useState({ users_sync: [] });
@@ -13,30 +16,26 @@ function ListUsersSync({ userLoggedIn }) {
     socket.emit("sync users");
   }, []);
 
-  const handleOnClikNext = () => {
+  const handleOnClickNext = () => {
     socket.emit("next turn");
-  };
-
-  const handleOnClikStart = () => {
-    socket.emit("start sync");
   };
 
   return (
     <>
-      <ListUsers users={data.users_sync} title="Users Sync" />
-      <button onClick={handleOnClikStart}>Start</button>
-
-      {data.turn && (
-        <div>
-          <h2>Turn: {data.turn.name}</h2>
-          <button
-            disabled={!(userLoggedIn === data.turn.name)}
-            onClick={handleOnClikNext}
-          >
-            Next
-          </button>
-        </div>
-      )}
+      <ListUsers
+        users={data.users_sync}
+        title="Users Sync"
+        subtitle={data.turn && `Turn: ${data.turn.name}`}
+      />
+      <Button
+        style={{ marginTop: "8px" }}
+        icon={<StepForwardOutlined />}
+        disabled={data.turn && !(userLoggedIn === data.turn.name)}
+        onClick={handleOnClickNext}
+        type="primary"
+      >
+        Next
+      </Button>
     </>
   );
 }

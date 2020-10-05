@@ -2,8 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useSocket } from "../hooks/socket/useSocket";
 import ListUsers from "./ListUsers";
 
-function ListUsersOnline() {
-
+function ListUsersOnline({ userLoggedIn }) {
   const [users, setUsers] = useState([]);
   const { socket } = useSocket("streamUsers", ({ users_online }) =>
     setUsers(users_online)
@@ -15,7 +14,9 @@ function ListUsersOnline() {
     });
   }, []);
 
-  return <ListUsers users={users} title="Users Online" />;
+  return (
+    <ListUsers users={users} title="Users Online" subtitle={`User Loggedin: ${userLoggedIn}`} />
+  );
 }
 
 export default ListUsersOnline;

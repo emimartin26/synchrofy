@@ -1,7 +1,5 @@
 # Synchrofy
 
-[![Deploy](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy)
-
 
 A simple application to manage shifts in a stand up scrum.
 
@@ -25,9 +23,6 @@ If the installation was successful, you should be able to run the following comm
 
     $ node --version
     v12.16.3
-
-    $ npm --version
-    6.1.0
 
 ###
 ### Yarn installation
