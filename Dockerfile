@@ -21,4 +21,4 @@ RUN npm run build
 EXPOSE 4001
 
 # Finally runs the application
-CMD [ "npm", "run", "dev:start" ]
+CMD [ "npm", "start" ]
