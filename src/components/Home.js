@@ -1,7 +1,8 @@
 import React from "react";
 import { useSocket } from "../hooks/socket/useSocket";
 
-import { Button, Col, Row } from "antd";
+import { Button, Col, Row, Popconfirm, message } from "antd";
+
 import { PoweroffOutlined, CaretRightOutlined } from "@ant-design/icons";
 
 import ListUsersOnline from "./ListUsersOnline";
@@ -15,9 +16,10 @@ const gridStyle = {
 const Home = ({ userLoggedIn, handleOnClickLogout }) => {
   const { socket } = useSocket();
 
-  const handleOnClikStart = () => {
+  function confirm(e) {
     socket.emit("start sync");
-  };
+    message.success("Synct started...");
+  }
 
   return (
     <>
@@ -39,13 +41,19 @@ const Home = ({ userLoggedIn, handleOnClickLogout }) => {
         >
           Exit
         </Button>
-        <Button
-          icon={<CaretRightOutlined />}
-          onClick={handleOnClikStart}
-          type="primary"
+        <Popconfirm
+          title="Are you sure start sync?"
+          onConfirm={confirm}
+          okText="Yes"
+          cancelText="No"
         >
-          Start
-        </Button>
+          <Button
+            icon={<CaretRightOutlined />}
+            type="primary"
+          >
+            Start
+          </Button>
+        </Popconfirm>
       </Row>
     </>
   );
